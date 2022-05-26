@@ -2,21 +2,29 @@ package bar;
 
 import java.util.Queue;
 import java.util.Random;
+import java.util.UUID;
 
 public class Cliente extends Thread{
 	private Random random;
 	private Queue<Garcom> _garcomsDisponiveis;
 	private Bar _bar;
+	
+	public String nome;
 
 	public Cliente(Queue<Garcom> garcomsDisponiveis, Bar bar) {
 		random = new Random();
 		_garcomsDisponiveis = garcomsDisponiveis;
 		_bar = bar;
+		nome = UUID.randomUUID().toString();
 	}
 	
 	@Override
 	public void run() {
+		System.out.println("Cliente " + nome + " chegou ao bar");
+
+		
 		while(barEstaAberto()) {	
+		
 			Garcom garcom;
 		
 			synchronized (_garcomsDisponiveis) {
@@ -24,6 +32,7 @@ public class Cliente extends Thread{
 				
 				while(garcom == null) {
 					try {
+						System.out.println("Cliente " + nome + " não conseguiu garçom e ira esperar");
 						_garcomsDisponiveis.wait();
 						garcom = _garcomsDisponiveis.poll();
 					} catch (InterruptedException e) {
@@ -33,11 +42,14 @@ public class Cliente extends Thread{
 				}
 			}
 			
+			System.out.println("Cliente " + nome + " chamou o garcom " + garcom.nome);
+			
 			Pedido pedido = new Pedido();
 			pedido.cliente = this;
 			garcom.receberPedido(pedido);
 			esperarPedido(pedido);
 		}
+
 	}	
 	
 	private void esperarPedido(Pedido pedido) {
@@ -56,7 +68,8 @@ public class Cliente extends Thread{
 	}
 	
 	private void receberPedido() {
-		System.out.println("Recebendo pedido");
+		System.out.println("O cliente " + nome + " recebeu o pedido");
+		consumirPedido();
 	}
 	
 	private void consumirPedido() {

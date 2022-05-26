@@ -17,10 +17,13 @@ public class Bar extends Thread {
 		
 		if(_garcomsFinalizados == _garcomsTrabalhando) {
 			aberto = false;
+			System.out.println("O bar não aceita novos pedidos (fechou)");
 		}
 	}
 	
 	public void preparaPedidos(ColecaoPedidos colecaoPedidos) {
+		System.out.println("O bar recebeu os pedidos do garcom " + colecaoPedidos.garcom.nome);
+		
 		try {
 			sleep(2000); //tempo de preparo
 		} catch (InterruptedException e) {

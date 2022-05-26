@@ -2,6 +2,7 @@ package bar;
 
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.UUID;
 
 public class Garcom extends Thread {
 
@@ -13,6 +14,8 @@ public class Garcom extends Thread {
 	private Bar _bar;
 	
 	private Queue<Pedido> _pedidos;
+	
+	public String nome;
 	
 	public Garcom(
 			Queue<Garcom> garcomsDisponiveis, 
@@ -26,18 +29,17 @@ public class Garcom extends Thread {
 		_bar = bar;
 		
 		_pedidos = new LinkedList<Pedido>();
+		
+		nome = UUID.randomUUID().toString();
 	}
 	
 	@Override
 	public void run() {
-		while(_rodadasRestantes > 0) {
-			novaRodada();
-			esperarPedidos();
-		}
+		System.out.println("Garçom " + nome + " chegou ao bar");
 		
-		synchronized (_bar) {
-			_bar.garcomFinalizou();
-		}
+		novaRodada();
+		esperarPedidos();
+		
 	}
 	
 	private void novaRodada() {
@@ -52,6 +54,9 @@ public class Garcom extends Thread {
 	
 	public void receberPedido(Pedido pedido) {
 		_pedidos.add(pedido);
+		
+		System.out.println("O garçom " + nome + " recebeu o pedido de " + pedido.cliente.nome);
+		
 		if(_pedidos.size() == _capacidade) {
 			levaPedidosAoBar();
 		}
@@ -62,8 +67,8 @@ public class Garcom extends Thread {
 	
 	private void levaPedidosAoBar() {
 		synchronized (_bar) {
-			ColecaoPedidos colecaoPedidos = new ColecaoPedidos(_pedidos);
-			
+			ColecaoPedidos colecaoPedidos = new ColecaoPedidos(_pedidos, this);
+
 			_bar.preparaPedidos(colecaoPedidos);
 			
 			synchronized (colecaoPedidos) {
@@ -77,6 +82,33 @@ public class Garcom extends Thread {
 				}
 			}
 			
+			System.out.println("Os pedidos do garcom " + nome + " estão prontos");
+			entregarPedidos();
+		}
+	}
+	
+	private void entregarPedidos() {
+		Pedido pedido = _pedidos.poll();
+		
+		while(pedido != null) {
+			
+			synchronized (pedido) {
+				pedido.entregue = true;
+				System.out.println("O garcom " + nome + " entregou o pedido de " + pedido.cliente.nome);
+				pedido.notifyAll();
+			}
+			
+			pedido = _pedidos.poll();
+		}
+		
+		if(_rodadasRestantes > 0) {
+			novaRodada();
+			esperarPedidos();
+		}
+		else {
+			synchronized (_bar) {
+				_bar.garcomFinalizou();
+			}
 		}
 	}
 }
