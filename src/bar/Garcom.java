@@ -49,6 +49,7 @@ public class Garcom extends Thread {
 	private void esperarPedidos() {
 		synchronized (_garcomsDisponiveis) {
 			_garcomsDisponiveis.add(this);
+			_garcomsDisponiveis.notifyAll();
 		}
 	}
 	

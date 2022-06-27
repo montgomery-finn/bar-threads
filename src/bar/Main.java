@@ -10,7 +10,7 @@ public class Main {
 		int numeroClientes = 2;
 		int numeroGarcoms = 1;
 		int numeroRodadas = 1;
-		int capacidadeGarcom = 1;
+		int capacidadeGarcom = 2;
 	
 		Queue<Garcom> garcomsDisponiveis = new LinkedList<Garcom>();
 		Bar bar = new Bar(numeroGarcoms);
